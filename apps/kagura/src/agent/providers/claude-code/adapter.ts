@@ -464,6 +464,7 @@ export class ClaudeAgentSdkExecutor implements AgentExecutor {
       const { stdout } = await execFileAsync('claude', ['auth', 'status', '--json'], {
         env: process.env,
         timeout: 5_000,
+        windowsHide: true,
       });
       const status = JSON.parse(stdout) as ClaudeAuthStatus;
       this.logger.info(
