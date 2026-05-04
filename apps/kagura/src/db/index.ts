@@ -26,7 +26,7 @@ export function createDatabase(dbPath: string, options?: CreateDatabaseOptions) 
 
 export type AppDatabase = ReturnType<typeof createDatabase>['db'];
 
-function resolveMigrationsFolder(): string {
+export function resolveMigrationsFolder(): string {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
     // Built package: dist/*.js -> ../drizzle

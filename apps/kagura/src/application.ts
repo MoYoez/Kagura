@@ -9,7 +9,7 @@ import { createProviderRegistry } from '~/agent/registry.js';
 import type { AgentExecutor } from '~/agent/types.js';
 import { SqliteAnalyticsStore } from '~/analytics/sqlite-analytics-store.js';
 import { SqliteChannelPreferenceStore } from '~/channel-preference/sqlite-channel-preference-store.js';
-import { createDatabase } from '~/db/index.js';
+import { createDatabase, resolveMigrationsFolder } from '~/db/index.js';
 import { FileClaudeExecutionProbe } from '~/e2e/live/file-claude-execution-probe.js';
 import { FileSlackStatusProbe } from '~/e2e/live/file-slack-status-probe.js';
 import { appConfigAgentTeams, env, validateLiveE2EEnv } from '~/env/server.js';
@@ -37,6 +37,7 @@ import type { AgentTeamsConfig } from '~/slack/ingress/agent-team-routing.js';
 import { SlackPermissionBridge } from '~/slack/interaction/permission-bridge.js';
 import { SlackUserInputBridge } from '~/slack/interaction/user-input-bridge.js';
 import { startSlackAppWithRetry } from '~/slack/network-guard.js';
+import { resolveCommitDate, resolveGitHash } from '~/util/version.js';
 import { createReviewPanelServer, type ReviewPanelServer } from '~/web/review-panel.js';
 import { WorkspaceResolver } from '~/workspace/resolver.js';
 
@@ -75,6 +76,24 @@ export function createApplication(options?: RuntimeApplicationOptions): RuntimeA
         ? kaguraPaths.dbPath
         : path.resolve(process.cwd(), env.SESSION_DB_PATH);
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
+  const migrationsFolder = resolveMigrationsFolder();
+  if (process.env.KAGURA_DEBUG === 'true') {
+    logger.info(
+      'Debug diagnostics: cwd=%s node=%s git=%s commitDate=%s configDir=%s envFile=%s configJson=%s dbPath=%s migrations=%s provider=%s logLevel=%s reviewPanel=%s',
+      process.cwd(),
+      process.version,
+      resolveGitHash(),
+      resolveCommitDate(),
+      kaguraPaths.configDir,
+      kaguraPaths.envFile,
+      kaguraPaths.configJsonFile,
+      dbPath,
+      migrationsFolder,
+      env.AGENT_DEFAULT_PROVIDER,
+      env.LOG_LEVEL,
+      env.KAGURA_REVIEW_PANEL_ENABLED ? env.KAGURA_REVIEW_PANEL_BASE_URL : 'disabled',
+    );
+  }
   const { db, sqlite } = createDatabase(dbPath, { migrate: true });
   const a2aCoordinatorDbPath = path.resolve(
     process.cwd(),
