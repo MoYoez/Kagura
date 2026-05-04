@@ -75,7 +75,7 @@ export function createApplication(options?: RuntimeApplicationOptions): RuntimeA
         ? kaguraPaths.dbPath
         : path.resolve(process.cwd(), env.SESSION_DB_PATH);
   fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-  const { db, sqlite } = createDatabase(dbPath);
+  const { db, sqlite } = createDatabase(dbPath, { migrate: true });
   const a2aCoordinatorDbPath = path.resolve(
     process.cwd(),
     options?.a2aCoordinatorDbPath ?? env.A2A_COORDINATOR_DB_PATH,
